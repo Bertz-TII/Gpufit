@@ -12,4 +12,5 @@ Gpufit/java/gpufit/out
 # build folders
 build/
 /docs/_build
+/.venv/
 

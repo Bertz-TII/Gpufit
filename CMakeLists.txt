@@ -48,7 +48,7 @@ endfunction()
 set( DEFAULT_CUDA_ARCH All )
 
 # Set the default value for the USE_CUBLAS flag.  Valid values are "ON" or "OFF".
-set( DEFAULT_USE_CUBLAS OFF )
+set( DEFAULT_USE_CUBLAS ON )
 
 # Set the default value for the precision
 set( DEFAULT_DOUBLE_PRECISION OFF )

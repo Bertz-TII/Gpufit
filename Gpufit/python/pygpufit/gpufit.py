@@ -30,6 +30,14 @@ gpufit_func.argtypes = [c_size_t, c_size_t, POINTER(c_float), POINTER(c_float), 
                         POINTER(c_float), POINTER(c_int), c_float, c_int, POINTER(c_int), c_int, c_size_t,
                         POINTER(c_char), POINTER(c_float), POINTER(c_int), POINTER(c_float), POINTER(c_int)]
 
+
+gpufit_func_var = lib.gpufit_constrained_var_params
+gpufit_func_var.restype = c_int
+gpufit_func_var.argtypes = [c_size_t, c_size_t, POINTER(c_float), POINTER(c_float), c_int, POINTER(c_float),
+                        POINTER(c_float), POINTER(c_int), c_float, c_int, POINTER(c_int), c_int, c_size_t, 
+                        c_size_t,
+                        POINTER(c_char), POINTER(c_float), POINTER(c_int), POINTER(c_float), POINTER(c_int)]
+
 # gpufit_get_last_error function in the dll
 error_func = lib.gpufit_get_last_error
 error_func.restype = c_char_p
@@ -64,6 +72,7 @@ class ModelID:
     DHO_1D = 23
     DHO_1D_NUM = 24
     CAUCHY_LORENTZ_1D_NUM = 25
+    CAUCHY_LORENTZ_1D_NUM_VAR = 99
 
 
 
@@ -119,7 +128,7 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
 
 def fit_constrained(data, weights, model_id, initial_parameters, constraints=None, constraint_types=None,
                     tolerance=None, max_number_iterations=None, \
-                    parameters_to_fit=None, estimator_id=None, user_info=None):
+                    parameters_to_fit=None, estimator_id=None, user_info=None, n_params:int=0):
     """
     Calls the C interface fit function in the library.
     (see also http://gpufit.readthedocs.io/en/latest/bindings.html#python)
@@ -259,25 +268,47 @@ def fit_constrained(data, weights, model_id, initial_parameters, constraints=Non
 
     # call into the library (measure time)
     t0 = time.perf_counter()
-    status = gpufit_func(
-        gpufit_func.argtypes[0](number_fits), \
-        gpufit_func.argtypes[1](number_points), \
-        data.ctypes.data_as(gpufit_func.argtypes[2]), \
-        weights_p, \
-        gpufit_func.argtypes[4](model_id), \
-        initial_parameters.ctypes.data_as(gpufit_func.argtypes[5]), \
-        constraints_p, \
-        constraint_types.ctypes.data_as(gpufit_func.argtypes[7]), \
-        gpufit_func.argtypes[8](tolerance), \
-        gpufit_func.argtypes[9](max_number_iterations), \
-        parameters_to_fit.ctypes.data_as(gpufit_func.argtypes[10]), \
-        gpufit_func.argtypes[11](estimator_id), \
-        gpufit_func.argtypes[12](user_info_size), \
-        user_info_p, \
-        parameters.ctypes.data_as(gpufit_func.argtypes[14]), \
-        states.ctypes.data_as(gpufit_func.argtypes[15]), \
-        chi_squares.ctypes.data_as(gpufit_func.argtypes[16]), \
-        number_iterations.ctypes.data_as(gpufit_func.argtypes[17]))
+    if n_params == 0:
+        status = gpufit_func(
+            gpufit_func.argtypes[0](number_fits), \
+            gpufit_func.argtypes[1](number_points), \
+            data.ctypes.data_as(gpufit_func.argtypes[2]), \
+            weights_p, \
+            gpufit_func.argtypes[4](model_id), \
+            initial_parameters.ctypes.data_as(gpufit_func.argtypes[5]), \
+            constraints_p, \
+            constraint_types.ctypes.data_as(gpufit_func.argtypes[7]), \
+            gpufit_func.argtypes[8](tolerance), \
+            gpufit_func.argtypes[9](max_number_iterations), \
+            parameters_to_fit.ctypes.data_as(gpufit_func.argtypes[10]), \
+            gpufit_func.argtypes[11](estimator_id), \
+            gpufit_func.argtypes[12](user_info_size), \
+            user_info_p, \
+            parameters.ctypes.data_as(gpufit_func.argtypes[14]), \
+            states.ctypes.data_as(gpufit_func.argtypes[15]), \
+            chi_squares.ctypes.data_as(gpufit_func.argtypes[16]), \
+            number_iterations.ctypes.data_as(gpufit_func.argtypes[17]))
+    else:
+        status = gpufit_func_var(
+            gpufit_func_var.argtypes[0](number_fits), \
+            gpufit_func_var.argtypes[1](number_points), \
+            data.ctypes.data_as(gpufit_func_var.argtypes[2]), \
+            weights_p, \
+            gpufit_func_var.argtypes[4](model_id), \
+            initial_parameters.ctypes.data_as(gpufit_func_var.argtypes[5]), \
+            constraints_p, \
+            constraint_types.ctypes.data_as(gpufit_func_var.argtypes[7]), \
+            gpufit_func_var.argtypes[8](tolerance), \
+            gpufit_func_var.argtypes[9](max_number_iterations), \
+            parameters_to_fit.ctypes.data_as(gpufit_func_var.argtypes[10]), \
+            gpufit_func_var.argtypes[11](estimator_id), \
+            gpufit_func_var.argtypes[12](user_info_size), \
+            gpufit_func_var.argtypes[13](n_params),\
+            user_info_p, \
+            parameters.ctypes.data_as(gpufit_func_var.argtypes[15]), \
+            states.ctypes.data_as(gpufit_func_var.argtypes[16]), \
+            chi_squares.ctypes.data_as(gpufit_func_var.argtypes[17]), \
+            number_iterations.ctypes.data_as(gpufit_func_var.argtypes[18]))
     t1 = time.perf_counter()
 
     # check status

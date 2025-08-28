@@ -23,6 +23,7 @@ enum ModelID {
     DHO_1D = 23,
     DHO_1D_NUM = 24,
     CAUCHY_LORENTZ_1D_NUM = 25,
+    CAUCHY_LORENTZ_1D_NUM_VAR = 99,
 };
 
 // estimator ID

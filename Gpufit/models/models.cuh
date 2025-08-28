@@ -21,6 +21,7 @@
 #include "cauchy_lorentz_1d_numeric.cuh"
 #include "DHO.cuh"
 #include "DHO_numericDerivative.cuh"
+#include "cauchy_lorentz_1d_numeric_var.cuh"
 
 __device__ void calculate_model(
     ModelID const model_id,
@@ -99,6 +100,10 @@ __device__ void calculate_model(
         calculate_DHO_1d_num(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
         break; 
 
+    case CAUCHY_LORENTZ_1D_NUM_VAR:
+        calculate_cauchy_lorentz_1d_num_var(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break; 
+
     default:
         assert(0); // unknown model ID
     }
@@ -127,6 +132,8 @@ void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensi
     case CAUCHY_LORENTZ_1D_NUM:     n_parameters = 4; n_dimensions = 1; break;
     case DHO_1D:     n_parameters = 4; n_dimensions = 1; break;
     case DHO_1D_NUM:     n_parameters = 4; n_dimensions = 1; break;
+    case CAUCHY_LORENTZ_1D_NUM_VAR:     n_parameters = 4; n_dimensions = 1; break;
+    
 
     default: throw std::runtime_error("unknown model ID");
     }

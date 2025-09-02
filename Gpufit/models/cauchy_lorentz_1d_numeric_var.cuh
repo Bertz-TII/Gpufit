@@ -124,8 +124,8 @@ __device__ REAL get_der_lor_var (
     )
 {
     
-    REAL m = derivative_index == 0 ? parameters[0] + delta : parameters[0];
-    REAL b = derivative_index == 0 ? parameters[1] + delta : parameters[1];
+    REAL m = (derivative_index == 0) ? parameters[0] + delta : parameters[0];
+    REAL b = (derivative_index == 1) ? parameters[1] + delta : parameters[1];
 
     REAL x0;
     REAL gamma;
@@ -137,23 +137,23 @@ __device__ REAL get_der_lor_var (
     REAL value1 = x * m + b;
 
     for(i=2; i<n_parameters; i+=3){
-        A = derivative_index == i ? parameters[i]+ delta : parameters[i];
-        x0 = derivative_index == i ? parameters[i+1]+ delta : parameters[i+1];
-        gamma = derivative_index == i ? parameters[i+2]+ delta : parameters[i+2];
+        A = (derivative_index == i) ? parameters[i]+ delta : parameters[i];
+        x0 = (derivative_index == i+1) ? parameters[i+1]+ delta : parameters[i+1];
+        gamma = (derivative_index == i+2) ? parameters[i+2]+ delta : parameters[i+2];
         
         denominator = gamma * gamma + (x - x0) * (x - x0);
         value1 += A * gamma * gamma / denominator;  
     }
 
-    m = derivative_index == 0 ? parameters[0] - delta : parameters[0];
-    b = derivative_index == 0 ? parameters[1] - delta : parameters[1];
+    m = (derivative_index == 0) ? parameters[0] - delta : parameters[0];
+    b = (derivative_index == 1) ? parameters[1] - delta : parameters[1];
 
     REAL value2 = x * m + b;
 
     for(i=2; i<n_parameters; i+=3){
-        A = derivative_index == i ? parameters[i] - delta : parameters[i];
-        x0 = derivative_index == i ? parameters[i+1] - delta : parameters[i+1];
-        gamma = derivative_index == i ? parameters[i+2] - delta : parameters[i+2];
+        A = (derivative_index == i) ? parameters[i] - delta : parameters[i];
+        x0 = (derivative_index == i+1) ? parameters[i+1] - delta : parameters[i+1];
+        gamma = (derivative_index == i+2) ? parameters[i+2] - delta : parameters[i+2];
         
         denominator = gamma * gamma + (x - x0) * (x - x0);
         value2 += A * gamma * gamma / denominator;  
@@ -181,8 +181,7 @@ __device__ void calculate_cauchy_lorentz_1d_num_var(
     // indices
 
     REAL* user_info_float = (REAL*)user_info;
-    float n_paramsF = static_cast<float>(*user_info);
-    int n_params = static_cast<int>(n_paramsF);
+    int n_params = static_cast<int>(user_info_float[0]);
 
     REAL x = 0;
     if (!user_info_float)
@@ -202,16 +201,28 @@ __device__ void calculate_cauchy_lorentz_1d_num_var(
 
     // parameters
     
-    value[point_index] = get_value_lor_var(parameters, n_params, point_index, x);
 
-    // derivatives
-    // REAL squarred_denominator = denominator * denominator;
+    REAL m = parameters[0];
+    REAL b = parameters[1];
+    REAL A = parameters[2];
+    REAL x0 = parameters[3];
+    REAL gamma = parameters[4];
+
+    REAL denom = (gamma * gamma + (x - x0) * (x-x0));
+
+    value[point_index] = get_value_lor_var(parameters, n_params, point_index, x);
+    // value[point_index] = m * x + b + A * gamma * gamma / denom;
+
     REAL* current_derivatives = derivative + point_index;
 
-    // current_derivatives[0 * n_points] = gamma * gamma / denominator;                                // derivative A
-    // current_derivatives[1 * n_points] = 2 * A * gamma * gamma * (x - x0) / squarred_denominator;    // derivative x0
-    // current_derivatives[2 * n_points] = 2 * A * gamma * (x - x0) * (x - x0) / squarred_denominator; // derivative gamma
-    // current_derivatives[3 * n_points] = 1;
+    // current_derivatives[0 * n_points] = x;                                // derivative m
+    // current_derivatives[1 * n_points] = 1;                                // derivative m
+
+    
+    // current_derivatives[2 * n_points] = gamma * gamma / denom;    // derivative A
+    // current_derivatives[3 * n_points] = 2 * A * gamma * gamma * (x - x0)  / (denom * denom); // derivative x0
+    // current_derivatives[4 * n_points] = 2 * A * gamma * (x - x0)  / (denom * denom); // derivative gamma
+    
 
     REAL delta = 1e-3;
     
@@ -222,7 +233,12 @@ __device__ void calculate_cauchy_lorentz_1d_num_var(
     }
 
     
-    
+    // REAL f_plus_h;
+    // REAL f_minus_h;
+
+    // REAL m = parameters[0];
+    // REAL b = parameters[1];
+
 
     // f_plus_h = get_value_lor(A + h, x0, gamma, offset, point_index, x);
     // f_minus_h = get_value_lor(A - h, x0, gamma, offset, point_index, x);

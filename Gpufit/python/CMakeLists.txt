@@ -16,6 +16,11 @@ set( module_files
   "${CMAKE_CURRENT_SOURCE_DIR}/pygpufit/version.py"
 )
 
+set( pyinstaller_dir
+  "${CMAKE_CURRENT_SOURCE_DIR}/pygpufit/__pyinstaller"
+)
+
+
 if ( USE_CUBLAS AND DEFINED CUBLAS_DLL )
 	set( binary $<TARGET_FILE:Gpufit> ${CUBLAS_DLL} )
 else()
@@ -33,6 +38,8 @@ add_custom_target( PYTHON_PACKAGE
     make_directory ${module_directory}
   COMMAND ${CMAKE_COMMAND} -E
     copy_if_different ${module_files} ${module_directory}
+  COMMAND ${CMAKE_COMMAND} -E
+    copy_directory_if_different ${pyinstaller_dir} "${module_directory}/__pyinstaller"
   COMMAND ${CMAKE_COMMAND} -E
     copy_if_different ${binary} ${module_directory}
 )

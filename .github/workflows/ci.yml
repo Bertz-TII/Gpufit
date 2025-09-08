@@ -2,6 +2,8 @@ name: Build
 
 on:
   push:
+    branches:
+            - main
   workflow_dispatch:
 
 jobs:
@@ -12,13 +14,13 @@ jobs:
       matrix:
         # `include` will only run specific combinations (not permutations of these)
         include:
-          - os: windows-2019
-            cuda: "11.4.0"
-            visual_studio: "Visual Studio 16 2019"
-            python: "3.9"
-          - os: ubuntu-20.04
-            cuda: "11.4.0"
-            python: "3.9"
+          - os: windows-latest
+            cuda: "13.0.0"
+            visual_studio: "Visual Studio 2022"
+            python: "3.12"
+          # - os: ubuntu-20.04
+          #   cuda: "11.4.0"
+          #   python: "3.9"
 
     env:
       build_dir: "build"
@@ -35,7 +37,7 @@ jobs:
           restore-keys: ${{ matrix.os }}-build
 
       - name: Setup Python ${{ matrix.python }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "${{ matrix.python }}"
           cache: "pip" # cache pip dependencies
@@ -46,20 +48,20 @@ jobs:
           pip install wheel
 
       - name: Install CUDA (Windows)
-        uses: Jimver/cuda-toolkit@v0.2.8
+        uses: Jimver/cuda-toolkit@v0.2.27
         if: runner.os == 'Windows'
         with:
           sub-packages: '["nvcc", "visual_studio_integration", "cublas", "curand", "nvrtc", "cudart"]'
-          cuda: ${{ matrix.cuda }}
+          # cuda: ${{ matrix.cuda }}
           method: network
           use-github-cache: false
 
       - name: Install CUDA (Linux)
-        uses: Jimver/cuda-toolkit@v0.2.8
+        uses: Jimver/cuda-toolkit@v0.2.27
         if: runner.os == 'Linux'
         with:
           sub-packages: '["nvcc", "nvrtc", "cudart"]'
-          cuda: ${{ matrix.cuda }}
+          # cuda: ${{ matrix.cuda }}
           method: network
           use-github-cache: false
 
@@ -118,6 +120,7 @@ jobs:
         with:
           name: ${{ matrix.os }}-x64-cuda-${{ matrix.cuda }}
           path: build/Release/**/*
+          retention-days: 5
 
       - name: Upload Artifacts (Linux)
         uses: actions/upload-artifact@v4

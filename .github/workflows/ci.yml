@@ -48,7 +48,7 @@ jobs:
           pip install wheel
 
       - name: Install CUDA (Windows)
-        uses: N-Storm/cuda-toolkit@v0.2.27m
+        uses: Jimver/cuda-toolkit@v0.2.24
         if: runner.os == 'Windows'
         with:
           sub-packages: '["nvcc", "visual_studio_integration", "cublas", "curand", "nvrtc", "cudart"]'

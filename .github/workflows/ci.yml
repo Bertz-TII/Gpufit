@@ -108,7 +108,7 @@ jobs:
       - name: Build (Windows)
         if: runner.os == 'Windows'
         working-directory: ${{ env.build_dir }}
-        run: cmake --build . --config ${{ env.config }} --target ALL_BUILD --verbose
+        run: cmake --build . --config ${{ env.config }} --target PYTHON_PACKAGE --verbose
 
       - name: Build (Linux)
         if: runner.os == 'Linux'

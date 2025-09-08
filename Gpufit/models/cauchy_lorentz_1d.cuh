@@ -6,7 +6,7 @@
 * Added by Sebastian Hambura the 06/2020
 *
 * This function calculates the values of the Cauchy distribution model functions
-* (also known as Lorentz distribution, Cauchy–Lorentz distribution or Lorentz(ian) function)
+* (also known as Lorentz distribution, Cauchyï¿½Lorentz distribution or Lorentz(ian) function)
 * and their partial derivatives with respect to the model parameters.
 * https://en.wikipedia.org/wiki/Cauchy_distribution
 * The function isn't expected to be normalized nor of 0-offset : f(x) =  A / (1 + [(x-x0)/gamma]**2) + offset
@@ -113,18 +113,19 @@ __device__ void calculate_cauchy_lorentz_1d(
     REAL x0 = parameters[1];
     REAL gamma = parameters[2];
     REAL offset = parameters[3];
+    REAL const pi = 3.14159f;
 
     // value
     REAL denominator = gamma * gamma + (x - x0) * (x - x0);
-    value[point_index] = A * gamma * gamma / denominator + offset;
+    value[point_index] = A / pi * gamma  / denominator + offset;
 
     // derivatives
     REAL squarred_denominator = denominator * denominator;
     REAL* current_derivatives = derivative + point_index;
 
-    current_derivatives[0 * n_points] = gamma * gamma / denominator;                                // derivative A
-    current_derivatives[1 * n_points] = 2 * A * gamma * gamma * (x - x0) / squarred_denominator;    // derivative x0
-    current_derivatives[2 * n_points] = 2 * A * gamma * (x - x0) * (x - x0) / squarred_denominator; // derivative gamma
+    current_derivatives[0 * n_points] = gamma * pi / denominator;                                // derivative A
+    current_derivatives[1 * n_points] = 2 * A  / pi * gamma * (x - x0) / squarred_denominator;    // derivative x0
+    current_derivatives[2 * n_points] =  A * ((x - x0) * (x - x0) - gamma * gamma)  / squarred_denominator / pi; // derivative gamma
     current_derivatives[3 * n_points] = 1;
 }
 

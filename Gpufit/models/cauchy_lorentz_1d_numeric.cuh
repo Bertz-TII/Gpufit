@@ -89,7 +89,8 @@ __device__ REAL get_value_lor (
     )
 {
     REAL denominator = gamma * gamma + (x - x0) * (x - x0);
-	return A * gamma * gamma / denominator + offset;
+    REAL const pi = 3.14159f;
+	return A / pi * gamma / denominator + offset;
 }
 
 __device__ void calculate_cauchy_lorentz_1d_num(
@@ -130,7 +131,7 @@ __device__ void calculate_cauchy_lorentz_1d_num(
     REAL offset = parameters[3];
 
     // value
-    REAL denominator = gamma * gamma + (x - x0) * (x - x0);
+    // REAL denominator = gamma * gamma + (x - x0) * (x - x0);
     value[point_index] = get_value_lor(A, x0, gamma, offset, point_index, x);
 
     // derivatives

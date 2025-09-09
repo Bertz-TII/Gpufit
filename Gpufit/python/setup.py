@@ -45,4 +45,7 @@ if __name__ == "__main__":
         packages=find_packages(where=HERE),
         package_data={'pygpufit': ['*{}'.format(lib_ext)]},
         install_requires=['NumPy>=1.0'],
+        entry_points={'pyinstaller40':
+                      ['hook-dirs = pygpufit.__pyinstaller:get_hook_dirs'],
+        },
         zip_safe=False)

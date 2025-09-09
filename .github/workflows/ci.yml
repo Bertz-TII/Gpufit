@@ -169,6 +169,7 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           makeLatest: true
+          tag: latest-win
           artifacts: |
               pyGPUFit-win.zip
 

@@ -113,7 +113,7 @@ elseif( CUDA_ARCHITECTURES STREQUAL All )
     list( APPEND CUDA_ARCHITECTURES "8.6" )
   endif()
   
-  # string( APPEND CUDA_ARCHITECTURES "+PTX" )
+  string( APPEND CUDA_ARCHITECTURES "+PTX" )
   
 endif()
 

@@ -92,6 +92,14 @@ void linear_regression_example()
 	std::vector< REAL > output_chi_square(n_fits);
 	std::vector< int > output_number_iterations(n_fits);
 
+	bool cudaAvailable = gpufit_cuda_available();
+	std::cout << "Cuda Available              " << cudaAvailable << "\n";
+	int rtVersion, cudaVersion;
+	gpufit_get_cuda_version(&rtVersion, &cudaVersion);
+	std::cout << "RT version " << rtVersion << " CUDA Version " << cudaVersion<< "\n\n";
+	
+
+
 	// call to gpufit (C interface)
 	int const status = gpufit
         (

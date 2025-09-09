@@ -15,7 +15,7 @@ jobs:
         # `include` will only run specific combinations (not permutations of these)
         include:
           - os: windows-latest
-            cuda: "12.0.0"
+            cuda: "12.9.0"
             visual_studio: "Visual Studio 2022"
             python: "3.12"
           # - os: ubuntu-20.04
@@ -121,7 +121,14 @@ jobs:
         with:
           name: ${{ matrix.os }}-x64-cuda-${{ matrix.cuda }}
           path: build/Release/**/*
-          retention-days: 5
+
+      - name: Upload Python Package (Windows)
+        uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: ${{ matrix.os }}-x64-cuda-${{ matrix.cuda }}
+          path: build/Release/pyGpufit/*
+          
 
       - name: Upload Artifacts (Linux)
         uses: actions/upload-artifact@v4

@@ -54,7 +54,7 @@ jobs:
           sub-packages: '["nvcc", "visual_studio_integration", "cublas", "curand", "nvrtc", "cudart"]'
           cuda: ${{ matrix.cuda }}
           method: network
-          use-github-cache: false
+          use-github-cache: true
 
       - name: Install CUDA (Linux)
         uses: Jimver/cuda-toolkit@v0.2.27
@@ -126,7 +126,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: runner.os == 'Windows'
         with:
-          name: ${{ matrix.os }}-x64-cuda-${{ matrix.cuda }}
+          name: ${{ matrix.os }}-x64-cuda-${{ matrix.cuda }}-${{ matrix.python }}
           path: build/Release/pyGpufit/*
           
 

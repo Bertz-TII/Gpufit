@@ -2,6 +2,8 @@ name: Build
 
 on:
   push:
+    branches:
+            - main
   workflow_dispatch:
 
 jobs:
@@ -12,17 +14,20 @@ jobs:
       matrix:
         # `include` will only run specific combinations (not permutations of these)
         include:
-          - os: windows-2019
-            cuda: "11.4.0"
-            visual_studio: "Visual Studio 16 2019"
-            python: "3.9"
-          - os: ubuntu-20.04
-            cuda: "11.4.0"
-            python: "3.9"
+          - os: windows-latest
+            cuda: "12.9.0"
+            visual_studio: "Visual Studio 2022"
+            python: "3.12"
+          # - os: ubuntu-20.04
+          #   cuda: "11.4.0"
+          #   python: "3.9"
 
     env:
       build_dir: "build"
       config: "Release"
+
+    outputs:
+      output_win: ${{ steps.artifact-upload-step-windows.outputs.artifact-id }}
 
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +40,7 @@ jobs:
           restore-keys: ${{ matrix.os }}-build
 
       - name: Setup Python ${{ matrix.python }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "${{ matrix.python }}"
           cache: "pip" # cache pip dependencies
@@ -46,20 +51,20 @@ jobs:
           pip install wheel
 
       - name: Install CUDA (Windows)
-        uses: Jimver/cuda-toolkit@v0.2.8
+        uses: Jimver/cuda-toolkit@v0.2.24
         if: runner.os == 'Windows'
         with:
           sub-packages: '["nvcc", "visual_studio_integration", "cublas", "curand", "nvrtc", "cudart"]'
           cuda: ${{ matrix.cuda }}
           method: network
-          use-github-cache: false
+          use-github-cache: true
 
       - name: Install CUDA (Linux)
-        uses: Jimver/cuda-toolkit@v0.2.8
+        uses: Jimver/cuda-toolkit@v0.2.27
         if: runner.os == 'Linux'
         with:
           sub-packages: '["nvcc", "nvrtc", "cudart"]'
-          cuda: ${{ matrix.cuda }}
+          # cuda: ${{ matrix.cuda }}
           method: network
           use-github-cache: false
 
@@ -70,6 +75,7 @@ jobs:
           ls "$CUDA_PATH"
           ls "$CUDA_PATH/bin"
           ls "$CUDA_PATH/include"
+          ls "$CUDA_PATH/include/crt"
 
       - name: cmake version
         shell: bash
@@ -105,7 +111,7 @@ jobs:
       - name: Build (Windows)
         if: runner.os == 'Windows'
         working-directory: ${{ env.build_dir }}
-        run: cmake --build . --config ${{ env.config }} --target ALL_BUILD --verbose
+        run: cmake --build . --config ${{ env.config }} --target PYTHON_PACKAGE --verbose
 
       - name: Build (Linux)
         if: runner.os == 'Linux'
@@ -118,10 +124,62 @@ jobs:
         with:
           name: ${{ matrix.os }}-x64-cuda-${{ matrix.cuda }}
           path: build/Release/**/*
+          overwrite: true
+
+      - name: Upload Python Package (Windows)
+        uses: actions/upload-artifact@v4
+        id: artifact-upload-step-windows
+        if: runner.os == 'Windows'
+        with:
+          name: pyGPUFit-${{ matrix.os }}-x64-cuda-${{ matrix.cuda }}-${{ matrix.python }}
+          path: build/Release/pyGpufit/*
+          overwrite: true
+          
 
       - name: Upload Artifacts (Linux)
         uses: actions/upload-artifact@v4
         if: runner.os == 'Linux'
+        id: artifact-upload-step-linux
         with:
           name: ${{ matrix.os }}-x64-cuda-${{ matrix.cuda }}
           path: build/**/*
+          overwrite: true
+  
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v5
+        with:
+          artifact-ids: ${{needs.build.outputs.output_win}}
+
+      - name: List Files
+        run: |
+          ls
+          zip -r pyGPUFit-win.zip .
+
+      - name: Release Package
+        uses: ncipollo/release-action@v1
+        with:
+          name: latest-win
+          allowUpdates: true
+          replacesArtifacts: true
+          makeLatest: true
+          tag: latest-win
+          artifacts: |
+              pyGPUFit-win.zip
+
+          
+
+
+
+
+
+
+
+        
+

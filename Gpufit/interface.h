@@ -32,6 +32,7 @@ public:
     
     virtual ~FitInterface();
     void fit(ModelID const model_id);
+    void set_n_parameters(int n_params);
 
 private:
     void check_sizes();

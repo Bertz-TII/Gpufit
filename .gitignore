@@ -9,5 +9,8 @@ Gpufit/java/gpufit/.gradle
 Gpufit/java/gpufit/out
 
 # build folders
+build/
+/docs/_build
+/.venv/
 **/build/*
 

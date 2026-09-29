@@ -82,8 +82,15 @@ void FitInterface::configure_info(Info & info, ModelID const model_id)
 void FitInterface::fit(ModelID const model_id)
 {
     int n_dimensions = 0;
-    configure_model(model_id, n_parameters_, n_dimensions);
 
+    if (n_parameters_ == 0){
+        configure_model(model_id, n_parameters_, n_dimensions);
+    }
+    else{
+        int dummy=0;
+        configure_model(model_id, dummy, n_dimensions);
+    }
+    
     check_sizes();
 
     Info info;
@@ -105,4 +112,9 @@ void FitInterface::fit(ModelID const model_id)
         output_n_iterations_
     ) ;
     lmfit.run(tolerance_);
+}
+
+void FitInterface::set_n_parameters(int n_params){
+    n_parameters_ = n_params;
+
 }
